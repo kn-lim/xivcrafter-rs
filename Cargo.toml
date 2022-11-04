@@ -1,8 +1,15 @@
 [package]
-name = "xivcrafter-rs"
+name = "xivcrafter"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Automatically activates multiple crafting macros while refreshing food and potion buffs"
+readme = "README.md"
+repository = "https://github.com/kn-lim/xivcrafter-rs/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clap = { version = "4.0.11", features = ["derive"] }
+serde = { version = "1.0.145", features = ["derive"] }
+serde_yaml = "0.9.13"
