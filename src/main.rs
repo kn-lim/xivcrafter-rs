@@ -1,10 +1,10 @@
+use crate::crafter::crafter::init;
 use clap::{Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::path::PathBuf;
 
-mod crafter;
-mod ui;
+pub mod crafter;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -167,17 +167,17 @@ fn main() {
             // parse config
             let mut config_file = ConfigData {
                 amount: 0,
-                cancel: "".to_string(),
-                confirm: "".to_string(),
-                food: "".to_string(),
+                cancel: String::from(""),
+                confirm: String::from(""),
+                food: String::from(""),
                 food_duration: 0,
-                macro1: "".to_string(),
+                macro1: String::from(""),
                 macro1_duration: 0,
-                macro2: "".to_string(),
+                macro2: String::from(""),
                 macro2_duration: 0,
-                potion: "".to_string(),
-                start_pause: "".to_string(),
-                stop: "".to_string(),
+                potion: String::from(""),
+                start_pause: String::from(""),
+                stop: String::from(""),
             };
             if start.config.is_some() {
                 let file = std::fs::File::open(start.config.as_ref().unwrap())
@@ -281,7 +281,10 @@ fn main() {
                 stop = start.stop.as_ref().unwrap().to_string();
             }
 
-            let _xiv = init(
+            // verbose
+            let verbose = start.verbose;
+
+            let mut xiv = init(
                 amount,
                 cancel,
                 confirm,
@@ -294,26 +297,27 @@ fn main() {
                 potion,
                 start_pause,
                 stop,
+                verbose,
             );
 
-            
+            xiv.run();
         }
 
         Commands::Config(config) => {
             // parse config
             let mut config_file = ConfigData {
                 amount: 0,
-                cancel: "".to_string(),
-                confirm: "".to_string(),
-                food: "".to_string(),
+                cancel: String::from(""),
+                confirm: String::from(""),
+                food: String::from(""),
                 food_duration: 0,
-                macro1: "".to_string(),
+                macro1: String::from(""),
                 macro1_duration: 0,
-                macro2: "".to_string(),
+                macro2: String::from(""),
                 macro2_duration: 0,
-                potion: "".to_string(),
-                start_pause: "".to_string(),
-                stop: "".to_string(),
+                potion: String::from(""),
+                start_pause: String::from(""),
+                stop: String::from(""),
             };
             if config.config.is_some() {
                 let file = std::fs::File::open(config.config.as_ref().unwrap())
@@ -431,65 +435,4 @@ fn main() {
             println!("stop: {}", stop);
         }
     }
-}
-
-/// Crafter struct
-struct Crafter {
-    running: bool,
-    program_running: bool,
-    food: String,
-    food_duration: u32,
-    food_count: u32,
-    start_food_time: u32,
-    potion: String,
-    potion_count: u32,
-    start_potion_time: u32,
-    current_amount: u32,
-    max_amount: u32,
-    macro1: String,
-    macro1_duration: u32,
-    macro2: String,
-    macro2_duration: u32,
-    cancel: String,
-    confirm: String,
-    start_pause: String,
-    stop: String,
-}
-
-/// Initialize Crafter struct
-fn init(
-    amount: u32,
-    cancel: String,
-    confirm: String,
-    food: String,
-    food_duration: u32,
-    macro1: String,
-    macro1_duration: u32,
-    macro2: String,
-    macro2_duration: u32,
-    potion: String,
-    start_pause: String,
-    stop: String,
-) -> Crafter {
-    return Crafter {
-        running: false,
-        program_running: true,
-        food: food.trim().to_lowercase(),
-        food_duration: food_duration,
-        food_count: 0,
-        start_food_time: 0,
-        potion: potion.trim().to_lowercase(),
-        potion_count: 0,
-        start_potion_time: 0,
-        current_amount: 0,
-        max_amount: amount,
-        macro1: macro1.trim().to_lowercase(),
-        macro1_duration: macro1_duration,
-        macro2: macro2.trim().to_lowercase(),
-        macro2_duration: macro2_duration,
-        cancel: cancel.trim().to_lowercase(),
-        confirm: confirm.trim().to_lowercase(),
-        start_pause: start_pause.trim().to_lowercase(),
-        stop: stop.trim().to_lowercase(),
-    };
 }
