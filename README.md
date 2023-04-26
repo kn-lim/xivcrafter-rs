@@ -6,8 +6,12 @@ Tested on Windows and Keyboard only.
 
 ## Packages
 
-- [clap](https://docs.rs/clap/latest/clap/)
-- [serde](https://docs.rs/serde/latest/serde/)
+- [tui](https://github.com/fdehau/tui-rs)
+- [serde](https://github.com/serde-rs/serde)
+- [serde_json](https://github.com/serde-rs/json)
+- [crossterm](https://github.com/crossterm-rs/crossterm)
+- [enigo](https://github.com/enigo-rs/enigo)
+- [dirs](https://github.com/dirs-dev/dirs-rs)
 
 # Using the Tool
 

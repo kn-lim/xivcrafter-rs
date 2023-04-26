@@ -1,0 +1,40 @@
+[
+	{
+		"id": 0,
+		"last_used": false,
+		"name": "test1_asdf",
+		"amount": 10,
+		"food": "1",
+		"food_duration": 0,
+		"potion": "2",
+		"macro1": "3",
+		"macro1_duration": 15,
+		"macro2": "4",
+		"macro2_duration": 20,
+		"macro3": "5",
+		"macro3_duration": 25,
+		"start_pause": "t",
+		"stop": "s",
+		"confirm": "pageup",
+		"cancel": "pagedown"
+	},
+	{
+		"id": 1,
+		"last_used": true,
+		"name": "test2_hello",
+		"amount": 15,
+		"food": "f",
+		"food_duration": 0,
+		"potion": "p",
+		"macro1": "m",
+		"macro1_duration": 15,
+		"macro2": "a",
+		"macro2_duration": 20,
+		"macro3": "c",
+		"macro3_duration": 25,
+		"start_pause": "r",
+		"stop": "o",
+		"confirm": "insert",
+		"cancel": "delete"
+	}
+]
