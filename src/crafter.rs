@@ -1,1 +1,1 @@
-pub mod crafter;
+pub mod app;

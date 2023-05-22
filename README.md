@@ -28,3 +28,11 @@ cargo build
 Binary is located in `target/debug`
 
 ## How to Run
+
+Run:
+
+```
+./xivcrafter
+```
+
+- Although this program is able to output a keyboard event to any window in focus, the terminal must be in focus for it to receive a user input. Therefore, if the program is running and you want to pause it, you will need to focus on the terminal and then press the pause hotkey.
