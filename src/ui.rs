@@ -133,9 +133,9 @@ where
     }
 
     rows.push(Row::new(vec!["Start/Pause:", &app.start_pause]));
-    rows.push(Row::new(vec!["Stop", &app.stop]));
-    rows.push(Row::new(vec!["Confirm", &app.confirm]));
-    rows.push(Row::new(vec!["Cancel", &app.cancel]));
+    rows.push(Row::new(vec!["Stop:", &app.stop]));
+    rows.push(Row::new(vec!["Confirm:", &app.confirm]));
+    rows.push(Row::new(vec!["Cancel:", &app.cancel]));
 
     let table = Table::new(rows)
         .style(Style::default().fg(Color::White))
