@@ -6,10 +6,10 @@ use crossterm::event::{self, Event, KeyCode};
 
 use std::{
     fs, io,
-    path::{PathBuf},
+    path::PathBuf,
     sync::{
         atomic::{AtomicBool, Ordering},
-        Arc, mpsc,
+        mpsc, Arc,
     },
     time::{Duration, Instant},
 };

@@ -8,7 +8,7 @@ use std::{
     path::PathBuf,
     sync::{
         atomic::{AtomicBool, Ordering},
-        Arc, mpsc,
+        mpsc, Arc,
     },
     thread,
     time::{Duration, SystemTime, UNIX_EPOCH},
@@ -123,7 +123,11 @@ impl Crafter {
     }
 
     /// start_craft sets up the crafting action
-    fn start_craft(&mut self) {
+    fn start_craft(&mut self, tx: &mpsc::Sender<(i32, i32, i32, String)>) {
+        let msg = String::from("Starting craft...");
+        tx.send((self.current_amount, self.food_count, self.potion_count, msg))
+            .unwrap();
+
         let mut enigo = Enigo::new();
 
         let confirm = utils::get_enigo_key_code(&self.confirm);
@@ -139,7 +143,11 @@ impl Crafter {
     }
 
     /// stop_craft closes the crafting action
-    fn stop_craft(&mut self) {
+    fn stop_craft(&mut self, tx: &mpsc::Sender<(i32, i32, i32, String)>) {
+        let msg = String::from("Stopping craft...");
+        tx.send((self.current_amount, self.food_count, self.potion_count, msg))
+            .unwrap();
+
         let mut enigo = Enigo::new();
 
         let confirm = utils::get_enigo_key_code(&self.confirm);
@@ -156,7 +164,7 @@ impl Crafter {
     }
 
     /// check_food checks to see whether the food buff needs to be renewed
-    fn check_food(&mut self) {
+    fn check_food(&mut self, tx: &mpsc::Sender<(i32, i32, i32, String)>) {
         if self.food_start_time > 0 {
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
@@ -166,18 +174,22 @@ impl Crafter {
             let difference = now - self.food_start_time;
 
             if difference > self.food_duration {
-                self.consume_food();
+                self.consume_food(tx);
             }
         } else {
-            self.consume_food();
+            self.consume_food(tx);
         }
     }
 
     /// consume_food renews the food buff
-    fn consume_food(&mut self) {
-        let mut enigo = Enigo::new();
+    fn consume_food(&mut self, tx: &mpsc::Sender<(i32, i32, i32, String)>) {
+        self.stop_craft(tx);
 
-        self.stop_craft();
+        let msg = String::from("Consuming food...");
+        tx.send((self.current_amount, self.food_count, self.potion_count, msg))
+            .unwrap();
+
+        let mut enigo = Enigo::new();
 
         let food = utils::get_enigo_key_code(&self.food);
         self.food_start_time = SystemTime::now()
@@ -191,32 +203,36 @@ impl Crafter {
 
         self.increment_food();
 
-        self.start_craft();
+        self.start_craft(tx);
     }
 
     /// check_potion checks to see whether the potion buff needs to be renewed
-    fn check_potion(&mut self) {
+    fn check_potion(&mut self, tx: &mpsc::Sender<(i32, i32, i32, String)>) {
         if self.potion_start_time > 0 {
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .expect("Time went backwards")
                 .as_secs() as i64;
 
-            let difference = now - self.food_start_time;
+            let difference = now - self.potion_start_time;
 
             if difference > POTION_DURATION {
-                self.consume_potion();
+                self.consume_potion(tx);
             }
         } else {
-            self.consume_potion();
+            self.consume_potion(tx);
         }
     }
 
     /// consume_potion renews the potion buff
-    fn consume_potion(&mut self) {
-        let mut enigo = Enigo::new();
+    fn consume_potion(&mut self, tx: &mpsc::Sender<(i32, i32, i32, String)>) {
+        self.stop_craft(tx);
 
-        self.stop_craft();
+        let msg = String::from("Consuming potion...");
+        tx.send((self.current_amount, self.food_count, self.potion_count, msg))
+            .unwrap();
+
+        let mut enigo = Enigo::new();
 
         let potion = utils::get_enigo_key_code(&self.potion);
         self.potion_start_time = SystemTime::now()
@@ -230,45 +246,9 @@ impl Crafter {
 
         self.increment_potion();
 
-        self.start_craft();
+        self.start_craft(tx);
     }
 }
-
-// pub fn test(
-//     app: &App,
-//     program_signal: Arc<AtomicBool>,
-//     crafter_signal: Arc<AtomicBool>,
-// ) -> mpsc::Receiver<(i32, i32, i32, String)> {
-//     let path = app.config.clone();
-//     let last_used = app.last_used.clone();
-
-//     let (tx, rx) = mpsc::channel();
-
-//     thread::spawn(move || {
-//         loop {
-//             let mut crafter = Crafter::new(&path, last_used);
-
-//             while program_signal.load(Ordering::Relaxed) {
-//                 while crafter_signal.load(Ordering::Relaxed) {
-//                     tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, String::from("hello 1"))).unwrap();
-//                     thread::sleep(Duration::from_millis(500));
-//                     tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, String::from("hello 2"))).unwrap();
-//                     thread::sleep(Duration::from_millis(500));
-//                     tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, String::from("hello 3"))).unwrap();
-//                     thread::sleep(Duration::from_millis(500));
-                    
-//                     crafter.increment_amount();
-
-//                     if crafter.current_amount > crafter.max_amount {
-//                         crafter.current_amount = 0;
-//                     }
-//                 }
-//             }
-//         }
-//     });
-
-//     rx
-// }
 
 pub fn craft(
     app: &App,
@@ -286,73 +266,60 @@ pub fn craft(
             let mut crafter = Crafter::new(&path, last_used);
 
             while program_signal.load(Ordering::Relaxed) {
-                // Countdown to allow time for user to focus FFXIV
                 if crafter.current_amount == 0 {
-                    let msg = String::from("Starting in 5...");
-                    tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                    thread::sleep(Duration::from_secs(1));
-                    let msg = String::from("Starting in 4...");
-                    tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                    thread::sleep(Duration::from_secs(1));
-                    let msg = String::from("Starting in 3...");
-                    tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                    thread::sleep(Duration::from_secs(1));
-                    let msg = String::from("Starting in 2...");
-                    tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                    thread::sleep(Duration::from_secs(1));
-                    let msg = String::from("Starting in 1...");
-                    tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                    thread::sleep(Duration::from_secs(1));
+                    // Countdown to allow time for user to focus FFXIV
+                    countdown(&crafter, &tx);
                 }
 
                 while crafter_signal.load(Ordering::Relaxed) {
                     if paused {
                         // Countdown to allow time for user to focus FFXIV
-                        let msg = String::from("Starting in 5...");
-                        tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                        thread::sleep(Duration::from_secs(1));
-                        let msg = String::from("Starting in 4...");
-                        tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                        thread::sleep(Duration::from_secs(1));
-                        let msg = String::from("Starting in 3...");
-                        tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                        thread::sleep(Duration::from_secs(1));
-                        let msg = String::from("Starting in 2...");
-                        tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                        thread::sleep(Duration::from_secs(1));
-                        let msg = String::from("Starting in 1...");
-                        tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-                        thread::sleep(Duration::from_secs(1));
+                        countdown(&crafter, &tx);
 
                         paused = false;
                     }
 
                     let mut enigo = Enigo::new();
 
-                    let msg = String::from("Starting craft...");
-                    tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
-
-                    crafter.start_craft();
+                    crafter.start_craft(&tx);
 
                     // check food
                     if crafter.food != "" {
                         let msg = String::from("Checking food...");
-                        tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
+                        tx.send((
+                            crafter.current_amount,
+                            crafter.food_count,
+                            crafter.potion_count,
+                            msg,
+                        ))
+                        .unwrap();
 
-                        crafter.check_food();
+                        crafter.check_food(&tx);
                     }
 
                     // check potion
                     if crafter.potion != "" {
                         let msg: String = String::from("Checking potion...");
-                        tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
+                        tx.send((
+                            crafter.current_amount,
+                            crafter.food_count,
+                            crafter.potion_count,
+                            msg,
+                        ))
+                        .unwrap();
 
-                        crafter.check_potion();
+                        crafter.check_potion(&tx);
                     }
 
                     // activate macro 1
                     let msg = String::from("Activating Macro 1...");
-                    tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
+                    tx.send((
+                        crafter.current_amount,
+                        crafter.food_count,
+                        crafter.potion_count,
+                        msg,
+                    ))
+                    .unwrap();
                     let macro1 = utils::get_enigo_key_code(&crafter.macro1);
                     enigo.key_click(macro1.unwrap());
                     thread::sleep(Duration::from_millis(KEY_DELAY));
@@ -361,7 +328,13 @@ pub fn craft(
                     // activate macro 2
                     if crafter.macro2 != "" {
                         let msg = String::from("Activating Macro 2...");
-                        tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
+                        tx.send((
+                            crafter.current_amount,
+                            crafter.food_count,
+                            crafter.potion_count,
+                            msg,
+                        ))
+                        .unwrap();
                         let macro2 = utils::get_enigo_key_code(&crafter.macro2);
                         enigo.key_click(macro2.unwrap());
                         thread::sleep(Duration::from_millis(KEY_DELAY));
@@ -371,7 +344,13 @@ pub fn craft(
                     // activate macro 3
                     if crafter.macro3 != "" {
                         let msg = String::from("Activating Macro 3...");
-                        tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
+                        tx.send((
+                            crafter.current_amount,
+                            crafter.food_count,
+                            crafter.potion_count,
+                            msg,
+                        ))
+                        .unwrap();
                         let macro3 = utils::get_enigo_key_code(&crafter.macro3);
                         enigo.key_click(macro3.unwrap());
                         thread::sleep(Duration::from_millis(KEY_DELAY));
@@ -388,15 +367,82 @@ pub fn craft(
                 }
 
                 let msg = String::from("Waiting...");
-                tx.send((crafter.current_amount, crafter.food_count, crafter.potion_count, msg)).unwrap();
+                tx.send((
+                    crafter.current_amount,
+                    crafter.food_count,
+                    crafter.potion_count,
+                    msg,
+                ))
+                .unwrap();
                 if !paused {
                     crafter.update(&path, last_used);
                 }
                 paused = true;
-
             }
         }
     });
 
     rx
+}
+
+// Craft Helper Functions
+fn countdown(crafter: &Crafter, tx: &mpsc::Sender<(i32, i32, i32, String)>) {
+    let msg = String::from("Starting in 5...");
+    tx.send((
+        crafter.current_amount,
+        crafter.food_count,
+        crafter.potion_count,
+        msg,
+    ))
+    .unwrap();
+    thread::sleep(Duration::from_secs(1));
+
+    let msg = String::from("Starting in 4...");
+    tx.send((
+        crafter.current_amount,
+        crafter.food_count,
+        crafter.potion_count,
+        msg,
+    ))
+    .unwrap();
+    thread::sleep(Duration::from_secs(1));
+
+    let msg = String::from("Starting in 3...");
+    tx.send((
+        crafter.current_amount,
+        crafter.food_count,
+        crafter.potion_count,
+        msg,
+    ))
+    .unwrap();
+    thread::sleep(Duration::from_secs(1));
+
+    let msg = String::from("Starting in 2...");
+    tx.send((
+        crafter.current_amount,
+        crafter.food_count,
+        crafter.potion_count,
+        msg,
+    ))
+    .unwrap();
+    thread::sleep(Duration::from_secs(1));
+
+    let msg = String::from("Starting in 1...");
+    tx.send((
+        crafter.current_amount,
+        crafter.food_count,
+        crafter.potion_count,
+        msg,
+    ))
+    .unwrap();
+    thread::sleep(Duration::from_secs(1));
+
+    let msg = String::from("Starting in 0...");
+    tx.send((
+        crafter.current_amount,
+        crafter.food_count,
+        crafter.potion_count,
+        msg,
+    ))
+    .unwrap();
 }
