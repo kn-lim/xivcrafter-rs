@@ -78,7 +78,7 @@ pub fn ui<B: Backend>(
 pub fn ui_home<B>(
     f: &mut Frame<B>,
     app: &App,
-    message: &String,
+    message: &str,
     program_signal: &Arc<AtomicBool>,
     crafter_signal: &Arc<AtomicBool>,
     area: Rect,
@@ -162,14 +162,12 @@ fn draw_status<B>(
     if !program_signal.load(Ordering::Relaxed) {
         title.push_str("STOPPED");
         block = block.title(title);
+    } else if crafter_signal.load(Ordering::Relaxed) {
+        title.push_str("CRAFTING");
+        block = block.title(title).style(Style::default().fg(Color::Green));
     } else {
-        if crafter_signal.load(Ordering::Relaxed) {
-            title.push_str("CRAFTING");
-            block = block.title(title).style(Style::default().fg(Color::Green));
-        } else {
-            title.push_str("PAUSED");
-            block = block.title(title).style(Style::default().fg(Color::Red));
-        }
+        title.push_str("PAUSED");
+        block = block.title(title).style(Style::default().fg(Color::Red));
     }
     f.render_widget(block, area);
 
@@ -223,7 +221,7 @@ fn draw_status<B>(
     f.render_widget(gauge, status[3]);
 
     // Messages
-    f.render_widget(Paragraph::new(message.clone()), status[4]);
+    f.render_widget(Paragraph::new(message), status[4]);
 }
 
 // Config Tab

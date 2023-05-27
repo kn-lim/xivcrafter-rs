@@ -266,7 +266,7 @@ pub fn craft(
             let mut crafter = Crafter::new(&path, last_used);
 
             while program_signal.load(Ordering::Relaxed) {
-                if crafter.current_amount == 0 {
+                if crafter.current_amount == 0 && !paused {
                     // Countdown to allow time for user to focus FFXIV
                     countdown(&crafter, &tx);
                 }

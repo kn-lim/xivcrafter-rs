@@ -122,35 +122,30 @@ impl<'a> App<'a> {
             }
         }
 
-        match index {
-            Some(index) => {
-                // Settings
-                self.name = configs[index].name.clone();
-                self.last_used = configs[index].id;
-                self.max_amount = configs[index].amount;
+        if let Some(index) = index {
+            // Settings
+            self.name = configs[index].name.clone();
+            self.last_used = configs[index].id;
+            self.max_amount = configs[index].amount;
 
-                // Program Hotkeys
-                self.start_pause = configs[index].start_pause.clone();
-                self.stop = configs[index].stop.clone();
+            // Program Hotkeys
+            self.start_pause = configs[index].start_pause.clone();
+            self.stop = configs[index].stop.clone();
 
-                // Consumables
-                self.food = configs[index].food.clone();
-                self.food_duration = configs[index].food_duration;
-                self.potion = configs[index].potion.clone();
+            // Consumables
+            self.food = configs[index].food.clone();
+            self.food_duration = configs[index].food_duration;
+            self.potion = configs[index].potion.clone();
 
-                // In-Game Hotkeys
-                self.macro1 = configs[index].macro1.clone();
-                self.macro1_duration = configs[index].macro1_duration;
-                self.macro2 = configs[index].macro2.clone();
-                self.macro2_duration = configs[index].macro2_duration;
-                self.macro3 = configs[index].macro3.clone();
-                self.macro3_duration = configs[index].macro3_duration;
-                self.confirm = configs[index].confirm.clone();
-                self.cancel = configs[index].cancel.clone();
-            }
-            None => {
-                // TODO: Handle error if last_used doesn't exist in any
-            }
+            // In-Game Hotkeys
+            self.macro1 = configs[index].macro1.clone();
+            self.macro1_duration = configs[index].macro1_duration;
+            self.macro2 = configs[index].macro2.clone();
+            self.macro2_duration = configs[index].macro2_duration;
+            self.macro3 = configs[index].macro3.clone();
+            self.macro3_duration = configs[index].macro3_duration;
+            self.confirm = configs[index].confirm.clone();
+            self.cancel = configs[index].cancel.clone();
         }
     }
 }
