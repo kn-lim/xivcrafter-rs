@@ -110,24 +110,24 @@ where
     rows.push(Row::new(vec!["Name:", &app.name]));
     rows.push(Row::new(vec!["Amount:", amount]));
 
-    if &app.food != "" {
+    if !app.food.is_empty() {
         rows.push(Row::new(vec!["Food:", &app.food]));
         rows.push(Row::new(vec!["Food Duration:", food_duration]));
     }
 
-    if &app.potion != "" {
+    if !app.potion.is_empty() {
         rows.push(Row::new(vec!["Potion:", &app.potion]));
     }
 
     rows.push(Row::new(vec!["Macro 1:", &app.macro1]));
     rows.push(Row::new(vec!["Macro 1 Duration:", macro1_duration]));
 
-    if &app.macro2 != "" {
+    if !app.macro2.is_empty() {
         rows.push(Row::new(vec!["Macro 2:", &app.macro2]));
         rows.push(Row::new(vec!["Macro 2 Duration:", macro2_duration]));
     }
 
-    if &app.macro3 != "" {
+    if !app.macro3.is_empty() {
         rows.push(Row::new(vec!["Macro 3:", &app.macro3]));
         rows.push(Row::new(vec!["Macro 3 Duration:", macro3_duration]));
     }
@@ -147,7 +147,7 @@ where
 fn draw_status<B>(
     f: &mut Frame<B>,
     app: &App,
-    message: &String,
+    message: &str,
     program_signal: &Arc<AtomicBool>,
     crafter_signal: &Arc<AtomicBool>,
     area: Rect,
@@ -210,7 +210,7 @@ fn draw_status<B>(
 
     title = String::from("Crafted: ");
     title.push_str(&current_amount);
-    title.push_str("/");
+    title.push('/');
     title.push_str(&max_amount);
     let gauge = Gauge::default()
         .block(Block::default().title(title))

@@ -256,7 +256,7 @@ pub fn craft(
     crafter_signal: Arc<AtomicBool>,
 ) -> mpsc::Receiver<(i32, i32, i32, String)> {
     let path = app.config.clone();
-    let last_used = app.last_used.clone();
+    let last_used = app.last_used;
 
     let (tx, rx) = mpsc::channel();
 
@@ -284,7 +284,7 @@ pub fn craft(
                     crafter.start_craft(&tx);
 
                     // check food
-                    if crafter.food != "" {
+                    if !crafter.food.is_empty() {
                         let msg = String::from("Checking food...");
                         tx.send((
                             crafter.current_amount,
@@ -298,7 +298,7 @@ pub fn craft(
                     }
 
                     // check potion
-                    if crafter.potion != "" {
+                    if !crafter.potion.is_empty() {
                         let msg: String = String::from("Checking potion...");
                         tx.send((
                             crafter.current_amount,
@@ -326,7 +326,7 @@ pub fn craft(
                     thread::sleep(Duration::from_secs(crafter.macro1_duration));
 
                     // activate macro 2
-                    if crafter.macro2 != "" {
+                    if !crafter.macro2.is_empty() {
                         let msg = String::from("Activating Macro 2...");
                         tx.send((
                             crafter.current_amount,
@@ -342,7 +342,7 @@ pub fn craft(
                     }
 
                     // activate macro 3
-                    if crafter.macro3 != "" {
+                    if !crafter.macro3.is_empty() {
                         let msg = String::from("Activating Macro 3...");
                         tx.send((
                             crafter.current_amount,
