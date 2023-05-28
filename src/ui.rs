@@ -20,7 +20,7 @@ use tui::{
 pub fn ui<B: Backend>(
     f: &mut Frame<B>,
     app: &App,
-    message: &String,
+    message: &str,
     program_signal: &Arc<AtomicBool>,
     crafter_signal: &Arc<AtomicBool>,
 ) {
