@@ -36,3 +36,7 @@ Run:
 ```
 
 - Although this program is able to output a keyboard event to any window in focus, the terminal must be in focus for it to receive a user input. Therefore, if the program is running and you want to pause it, you will need to focus on the terminal and then press the pause hotkey.
+
+## How to Change the Settings
+
+If you run XIVCrafter and `.xivcrafter.json` does not already exist in your home directory, it will create a default one in your home directory. 

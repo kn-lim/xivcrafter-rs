@@ -18,7 +18,7 @@ use tui::{backend::Backend, Terminal};
 
 // Constants
 /// XIVCrafter tick rate
-const TICK_RATE: Duration = Duration::from_millis(500);
+pub const TICK_RATE: Duration = Duration::from_millis(250);
 
 #[derive(Clone)]
 pub struct App<'a> {
@@ -56,7 +56,7 @@ pub struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    pub fn new(path: PathBuf) -> App<'a> {
+    pub fn init(path: PathBuf) -> App<'a> {
         let file = fs::read_to_string(&path).expect("Unable to read file");
         let json: serde_json::Value = serde_json::from_str(&file).expect("Unable to parse JSON");
         let configs: Vec<Config> = serde_json::from_value(json).unwrap();
@@ -162,15 +162,17 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Resu
 
     let mut message = String::from("Waiting...");
 
+    terminal.draw(|f| ui(f, &app, &message, &program_signal, &crafter_signal))?;
+
     loop {
-        terminal.draw(|f| ui(f, &app, &message, &program_signal, &crafter_signal))?;
+        // terminal.draw(|f| ui(f, &app, &message, &program_signal, &crafter_signal))?;
 
         let timeout = TICK_RATE
             .checked_sub(last_tick.elapsed())
             .unwrap_or_else(|| Duration::from_secs(0));
 
-        let start_pause_hotkey = utils::get_crossterm_key_code(&app.start_pause).unwrap();
-        let stop_hotkey = utils::get_crossterm_key_code(&app.stop).unwrap();
+        let start_pause_hotkey = utils::get_crossterm_key_code(&app.start_pause).unwrap_or(KeyCode::Null);
+        let stop_hotkey = utils::get_crossterm_key_code(&app.stop).unwrap_or(KeyCode::Null);
 
         if crossterm::event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
@@ -213,6 +215,8 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Resu
                     eprintln!("Error: {:?}", e);
                 }
             }
+
+            terminal.draw(|f| ui(f, &app, &message, &program_signal, &crafter_signal))?;
 
             last_tick = Instant::now();
         }

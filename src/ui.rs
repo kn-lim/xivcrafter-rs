@@ -198,7 +198,13 @@ fn draw_status<B>(
     f.render_widget(Paragraph::new(instructions_2), status[1]);
 
     // Progress Gauge
-    let mut progress = (app.current_amount * 100 / app.max_amount) as u16;
+    let mut progress: u16;
+    if app.max_amount == 0 {
+        progress = 0;
+    } else {
+        progress = (app.current_amount * 100 / app.max_amount) as u16;
+    }
+    
     if progress >= 100 {
         progress = 100;
     }
@@ -238,7 +244,7 @@ where
     let content = Paragraph::new(home)
         .block(
             Block::default()
-                .title("Config Content")
+                .title("Config Location")
                 .borders(Borders::ALL),
         )
         .wrap(Wrap { trim: true });
@@ -248,7 +254,11 @@ where
 
     let status = vec![Spans::from(file)];
     let status_content = Paragraph::new(status)
-        .block(Block::default().title("Status").borders(Borders::ALL))
+        .block(
+            Block::default()
+                .title("Config Contents")
+                .borders(Borders::ALL),
+        )
         .wrap(Wrap { trim: true });
 
     f.render_widget(status_content, chunks[1]);

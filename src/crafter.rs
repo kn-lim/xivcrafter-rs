@@ -378,7 +378,11 @@ pub fn craft(
                     crafter.update(&path, last_used);
                 }
                 paused = true;
+
+                thread::sleep(crate::app::TICK_RATE);
             }
+
+            thread::sleep(crate::app::TICK_RATE);
         }
     });
 
