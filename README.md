@@ -15,7 +15,7 @@ Tested on Windows and Keyboard only.
 
 # Using the Tool
 
-**Download the Windows 64-bit binary in the [Releases](https://github.com/kn-lim/xivcrafter-rs/releases) page.**
+**Download the Windows binary in the [Releases](https://github.com/kn-lim/xivcrafter-rs/releases) page.**
 
 ## How to Build
 
@@ -39,4 +39,6 @@ Run:
 
 ## How to Change the Settings
 
-If you run XIVCrafter and `.xivcrafter.json` does not already exist in your home directory, it will create a default one in your home directory. 
+If you run XIVCrafter and `.xivcrafter.json` does not already exist in your home directory, it will create a default one in your home directory.
+
+Modify `.xivcrafter.json` in your home directory with your settings.
