@@ -23,6 +23,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
-          bin: ...
+          bin: xivcrafter
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
